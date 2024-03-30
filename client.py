@@ -17,11 +17,31 @@ cap.release()
 retval, buffer = cv2.imencode('.jpg', frame)
 jpg_as_text = buffer.tobytes()
 
-# 将图像发送到服务器
-response = requests.post('http://your_server_ip:5000/ocr', files={'image': jpg_as_text})
 
-# 打印服务器的响应
-print(response.json())
 
+
+try:
+    # 将图像发送到服务器
+    response = requests.post('http://localhost:5000/ocr', files={'image': jpg_as_text})
+
+    # 检查服务器的响应状态
+    response.raise_for_status()
+
+    # 尝试解析服务器的响应为JSON
+    try:
+        data = response.json()
+        # 打印响应
+        print(data)
+    except ValueError:
+        print("服务器的响应不是有效的JSON格式")
+
+except requests.exceptions.HTTPError as errh:
+    print ("Http Error:",errh)
+except requests.exceptions.ConnectionError as errc:
+    print ("Error Connecting:",errc)
+except requests.exceptions.Timeout as errt:
+    print ("Timeout Error:",errt)
+except requests.exceptions.RequestException as err:
+    print ("Something went wrong",err)
 
 
