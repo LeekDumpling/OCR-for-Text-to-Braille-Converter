@@ -5,44 +5,63 @@
 目前返回的参数是一个字典，键值包括文本和坐标。
 """
 
+import MangWen
 from PIL import Image
 import pytesseract
 import io
 import os
 from flask import Flask, request
 import traceback
+import serial
+from time import sleep
+
+# # 串口通信
+# serial = serial.Serial('COM3', 9600, timeout=0.5)
+# if serial.isOpen() :
+#     print("open success")
+# else :
+#     print("open failed")
 
 app = Flask(__name__)
 # 设置tesseract.exe的路径，保存在.env文件中
 tesseract_path = os.getenv('TESSERACT_PATH')
 pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
+def recv(serial):
+    while True:
+        data = serial.read_all()
+        if data == '':
+            continue
+        else:
+            break
+        sleep(0.02)
+    return data
 
-# 定义一个路由，用于处理POST请求
+def send(serial, send_data):
+    if (serial.isOpen()):
+        serial.write(send_data.encode('utf-8'))  # 编码
+        print("发送成功", send_data)
+    else:
+        print("发送失败！")
+
 @app.route('/ocr', methods=['POST'])
 def ocr_image_with_coordinates():
     try:
-        # 从请求中获取图像文件
         file = request.files['image']
-        # 打开图像文件
         image = Image.open(io.BytesIO(file.read()))
-        # 保存图像以进行调试
         image.save('debug_image.jpg')
-        # 使用pytesseract库提取图像中的文字
         text = pytesseract.image_to_string(image)
-        # 使用pytesseract库获取每个字符的坐标
         coordinates = pytesseract.image_to_boxes(image)
-        # 将提取的文字和坐标返回给客户端
-        return {'text': text, 'coordinates': coordinates}
+        binary_text = MangWen.ascii_to_braille(text)
+        # for i in range(0, len(binary_text), 6):
+        #     send(serial, binary_text[i:i+6])
+        #     sleep(0.5)
+        return {'text': text, 'coordinates': coordinates, 'binary_text': binary_text}
     except Exception as e:
-        # 如果出现异常，打印错误信息和堆栈跟踪
         print("Error: ", str(e))
         print(traceback.format_exc())
         return {'error': str(e)}, 500
 
-
-
 if __name__ == '__main__':
-    # 启动服务器，监听5000端口，打开debug
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=32770, debug=True)
 

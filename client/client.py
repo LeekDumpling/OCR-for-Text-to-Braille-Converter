@@ -35,8 +35,8 @@ while True:
         print("captured from hotkey")
         start_time = time.time()  # 重置计时器
 
-    # 每隔10秒抓取屏幕
-    if time.time() - start_time >= 10:
+    # 每隔100秒抓取屏幕
+    if time.time() - start_time >= 100:
         cap = capture_screen()
         print("captured automatically")
         start_time = time.time()  # 重置计时器
@@ -48,7 +48,10 @@ while True:
 
         try:
             # 将图像发送到服务器
-            response = requests.post('http://localhost:5000/ocr', files={'image': jpg_as_text})
+            # 本地
+            response = requests.post('http://localhost:32770/ocr', files={'image': jpg_as_text})
+            # 远程
+            # response = requests.post('http://182.92.122.137:32770/ocr', files={'image': jpg_as_text})
 
             # 检查服务器的响应状态
             response.raise_for_status()
