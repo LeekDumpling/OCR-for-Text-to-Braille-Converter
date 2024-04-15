@@ -1,14 +1,10 @@
 import cv2
-import requests
 import numpy as np
 import pyautogui
 import keyboard
 import time
+import socket
 
-# 捕获图像
-# 从摄像头
-# cap = cv2.VideoCapture(0)
-#从屏幕
 def capture_screen():
     # 抓取屏幕
     screenshot = pyautogui.screenshot()
@@ -16,7 +12,18 @@ def capture_screen():
     frame = np.array(screenshot)
     # 将图片从BGR转换为RGB
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # 压缩图片大小
+    frame = cv2.resize(frame, (frame.shape[1] // 2, frame.shape[0] // 2))
     return frame
+
+# 1.创建socket
+tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 增加缓冲区
+tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4096)
+
+# 2. 链接服务器
+server_addr = ("182.92.122.137", 32771)
+tcp_socket.connect(server_addr)
 
 # 设置热键
 hotkey = 'F12'
@@ -36,7 +43,7 @@ while True:
         start_time = time.time()  # 重置计时器
 
     # 每隔100秒抓取屏幕
-    if time.time() - start_time >= 100:
+    if time.time() - start_time >= 1000:
         cap = capture_screen()
         print("captured automatically")
         start_time = time.time()  # 重置计时器
@@ -48,27 +55,11 @@ while True:
 
         try:
             # 将图像发送到服务器
-            # 本地
-            response = requests.post('http://localhost:32770/ocr', files={'image': jpg_as_text})
-            # 远程
-            # response = requests.post('http://182.92.122.137:32770/ocr', files={'image': jpg_as_text})
+            tcp_socket.sendall(jpg_as_text)  # 使用sendall一次性发送整个图像
+            print("Image sent to the server")
 
-            # 检查服务器的响应状态
-            response.raise_for_status()
+        except socket.error as e:
+            print("Something went wrong", e)
 
-            # 尝试解析服务器的响应为JSON
-            try:
-                data = response.json()
-                # 打印响应
-                print(data)
-            except ValueError:
-                print("服务器的响应不是有效的JSON格式")
-
-        except requests.exceptions.HTTPError as errh:
-            print("Http Error:", errh)
-        except requests.exceptions.ConnectionError as errc:
-            print("Error Connecting:", errc)
-        except requests.exceptions.Timeout as errt:
-            print("Timeout Error:", errt)
-        except requests.exceptions.RequestException as err:
-            print("Something went wrong", err)
+# 3. 关闭套接字
+tcp_socket.close()
