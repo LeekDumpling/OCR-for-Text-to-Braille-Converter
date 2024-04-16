@@ -24,8 +24,8 @@ braille_mapping = {
     '^': [0, 0, 0, 1, 1, 0], '_': [0, 0, 0, 1, 1, 1]
 }
 
-def ascii_to_braille(text):
 
+def ascii_to_braille(text):
     # 将文本转换为大写
     text = text.upper()
     braille_text = []
@@ -41,6 +41,7 @@ def ascii_to_braille(text):
 
     return braille_text
 
+
 def print_braille(braille_text):
     # 打印盲文凸点数
     for char_braille in braille_text:
@@ -49,8 +50,9 @@ def print_braille(braille_text):
         # 每个字符一行打印输出
         print(binary_string)
 
-# 示例用法
-text = "Hello, \ World!"
-braille_text = ascii_to_braille(text)
-print_braille(braille_text)
 
+# 示例用法
+if __name__ == '__main__':
+    text = "Hello, \ World!"
+    braille_text = ascii_to_braille(text)
+    print_braille(braille_text)
