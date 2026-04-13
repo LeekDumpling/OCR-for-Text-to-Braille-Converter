@@ -258,17 +258,6 @@ braille = ascii_to_braille("Hello")
 - [ ] 支持更多 OCR 语言包
 - [ ] 优化盲文编码标准（当前仅支持 ASCII 字符集）
 
----
-
-## 贡献指南
-
-欢迎提交 Issue 和 Pull Request！
-
-1. Fork 本仓库
-2. 创建特性分支：`git checkout -b feature/your-feature`
-3. 提交更改：`git commit -m 'feat: add your feature'`
-4. 推送分支：`git push origin feature/your-feature`
-5. 提交 Pull Request
 
 ---
 
